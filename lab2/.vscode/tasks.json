@@ -1,0 +1,22 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Build Complex.cpp + ComplexTest.cpp",
+      "type": "shell",
+      "command": "/usr/bin/g++",
+      "args": [
+        "-std=c++17",
+        "Complex.cpp",
+        "ComplexTest.cpp",
+        "-o",
+        "Complex"
+      ],
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      },
+      "problemMatcher": ["$gcc"]
+    }
+  ]
+}
