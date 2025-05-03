@@ -55,19 +55,14 @@ Complex& Complex::operator*=(const Complex &rhs) {
 }
 
 Complex& Complex::operator/=(const Complex &rhs) {
-    std::cout << " Run 6" << std::endl;
     // (a+bi) / (c+di) = (a+bi)*(c-di) / (c+di)*(c-di) = (ac+bd)/(c²+d²) + (bc-ad)/(c²+d²)i
     double denominator = rhs.re * rhs.re + rhs.im * rhs.im;
     double temp_re = (re * rhs.re + im * rhs.im) / denominator;
     double temp_im = (im * rhs.re - re * rhs.im) / denominator;
-
     re = temp_re;
     im = temp_im;
-    
-    
     return *this;
 }
-
 
 Complex& Complex::operator+=(double rhs) {
     re += rhs;
@@ -88,8 +83,6 @@ Complex& Complex::operator*=(double rhs) {
 Complex& Complex::operator/=(double rhs) {
     re /= rhs;
     im /= rhs;
-    std::cout << " Run 2" << std::endl;
-
     return *this;
 }
 
@@ -126,7 +119,6 @@ Complex operator*(const Complex &lhs, const Complex &rhs) {
 Complex operator/(const Complex &lhs, const Complex &rhs) {
     Complex result(lhs);
     result /= rhs;
-    std::cout << " Run 3" << std::endl;
     return result;
 }
 
@@ -164,14 +156,12 @@ Complex operator*(double lhs, const Complex &rhs) {
 Complex operator/(const Complex &lhs, double rhs) {
     Complex result(lhs);
     result /= rhs;
-    std::cout << " Run 4" << std::endl;
     return result;
 }
 
 Complex operator/(double lhs, const Complex &rhs) {
     // lhs / rhs = lhs * conjugate(rhs) / (|rhs|²)
     double denominator = rhs.real() * rhs.real() + rhs.imag() * rhs.imag();
-    std::cout << " Run 5" << std::endl;
     return Complex(
         lhs * rhs.real() / denominator,
         -lhs * rhs.imag() / denominator
@@ -229,46 +219,49 @@ std::ostream& operator<<(std::ostream &os, const Complex &z) {
 std::istream& operator>>(std::istream &is, Complex &z) {
     std::string input;
     is >> std::ws; // Skip leading whitespace
-    std::getline(is, input);
     
-    std::cout << "Input string: '" << input << "'" << std::endl;
+    // Check if we have parentheses format
+    char first_char;
+    is >> first_char;
     
-    // Parse different formats:
-    // 1. real
-    // 2. (real)
-    // 3. (real,imaginary)
-    
-    double real_part = 0.0;
-    double imaginary_part = 0.0;
-    
-    // Format: (real,imaginary)
-    std::regex complex_pattern(R"(\s*\(\s*([-+]?[0-9]*\.?[0-9]+)\s*,\s*([-+]?[0-9]*\.?[0-9]+)\s*\)\s*)");
-    std::regex real_parens_pattern(R"(\s*\(\s*([-+]?[0-9]*\.?[0-9]+)\s*\)\s*)");
-    std::smatch matches;
-    if (std::regex_match(input, matches, complex_pattern)) {
-        if (matches.size() == 3) {
-            std::istringstream(matches[1].str()) >> real_part;
-            std::istringstream(matches[2].str()) >> imaginary_part;
-            z = Complex(real_part, imaginary_part);
-            return is;
-        }
-    }
-    
-    // Format: (real)
-    if (std::regex_match(input, matches, real_parens_pattern)) {
-        if (matches.size() == 2) {
-            std::istringstream(matches[1].str()) >> real_part;
+    if (first_char == '(') {
+        // Format could be (real) or (real,imaginary)
+        double real_part;
+        is >> real_part;
+        
+        // Check for comma
+        char next_char;
+        is >> next_char;
+        
+        if (next_char == ',') {
+            // Format is (real,imaginary)
+            double imaginary_part;
+            is >> imaginary_part;
+            
+            // Should end with a closing parenthesis
+            char closing_paren;
+            is >> closing_paren;
+            
+            if (closing_paren == ')') {
+                z = Complex(real_part, imaginary_part);
+            } else {
+                is.setstate(std::ios::failbit);
+            }
+        } else if (next_char == ')') {
+            // Format is (real)
             z = Complex(real_part, 0.0);
-            return is;
+        } else {
+            is.setstate(std::ios::failbit);
         }
-    }
-    
-    // Format: real
-    try {
-        real_part = std::stod(input);
-        z = Complex(real_part, 0.0);
-    } catch (...) {
-        is.setstate(std::ios::failbit);
+    } else {
+        // Format is just a real number
+        is.putback(first_char);
+        double real_part;
+        if (is >> real_part) {
+            z = Complex(real_part, 0.0);
+        } else {
+            is.setstate(std::ios::failbit);
+        }
     }
     
     return is;
