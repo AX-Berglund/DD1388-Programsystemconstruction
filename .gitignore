@@ -13,3 +13,37 @@ ComplexExtendedTest
 *~
 *.swp
 
+# Prerequisites
+*.d
+
+# Precompiled
+*.gch
+*.pch
+
+# Compiled files
+*.slo
+*.lo
+*.obj
+
+# Compiled libraries
+*.lai
+*.la
+*.a
+*.lib
+*.so
+*.dylib
+*.dll
+*.mod
+*.smod
+
+
+
+# Executables
+*.exe
+*.out
+*.app
+.idea/**/workspace.xml
+.idea/**/tasks.xml
+chess
+*.swo
+runner.cpp
