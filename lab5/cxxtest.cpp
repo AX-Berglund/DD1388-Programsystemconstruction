@@ -309,8 +309,8 @@ class ChessTestSuite: public CxxTest::TestSuite {
       s << "k......." << std::endl;
       s >> chess;
 
-      bool w_k_in_check = chess.king_in_check(true);
-      bool b_k_in_check = chess.king_in_check(false);
+      bool w_k_in_check = chess.king_check(true);
+      bool b_k_in_check = chess.king_check(false);
       TS_ASSERT_EQUALS(w_k_in_check, true);
       TS_ASSERT_EQUALS(b_k_in_check, false);
     }

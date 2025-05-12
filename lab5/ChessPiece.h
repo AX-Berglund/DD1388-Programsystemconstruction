@@ -16,7 +16,7 @@ class ChessPiece {
   friend void ChessBoard::move_piece(ChessMove);
   friend void ChessBoard::rewind_move_piece(ChessMove,
       std::shared_ptr<ChessPiece>);
-  friend bool ChessBoard::king_in_check(bool isWhite);
+  friend bool ChessBoard::king_check(bool isWhite);
   friend bool ChessBoard::any_valid_move(bool isWhite);
   friend void ChessBoard::ai1_make_move(bool isWhite);
   friend void ChessBoard::ai2_make_move(bool isWhite);

@@ -14,6 +14,10 @@
 #include <memory>
 #include <cmath>
 
+//==============================================================================
+// Core Board Movement Functions
+//==============================================================================
+
 void ChessBoard::move_piece(ChessMove move) {
   std::shared_ptr<ChessPiece> cp = move.piece;
 
@@ -36,6 +40,10 @@ void ChessBoard::rewind_move_piece(ChessMove move,
 
   this->state.set_element(0, move.x_to+move.y_to*8, cp_removed_by_move);
 }
+
+//==============================================================================
+// AI Movement Functions
+//==============================================================================
 
 void ChessBoard::ai1_make_move(bool isWhite) {
 
@@ -129,6 +137,10 @@ void ChessBoard::ai2_make_move(bool isWhite) {
   switch_turn();
 }
 
+//==============================================================================
+// Piece Creation and Board Initialization
+//==============================================================================
+
 std::shared_ptr<ChessPiece> ChessBoard::create_new_piece(int x, int y,
     bool isWhite, int type, ChessBoard* board) {
   std::shared_ptr<ChessPiece> cp;
@@ -156,6 +168,10 @@ void ChessBoard::initialise_board(Matrix<std::shared_ptr<ChessPiece> > m) {
   turn = 1;
   state = m;
 }
+
+//==============================================================================
+// Board Input/Output Operations
+//==============================================================================
 
 ChessBoard & operator>>(std::istream& is, ChessBoard& board) {
   Matrix<std::shared_ptr<ChessPiece> > m(1, 64);
@@ -259,6 +275,9 @@ void ChessBoard::print_board() {
   std::cout << "  +---+---+---+---+---+---+---+---+\n" << std::endl;
 }
 
+//==============================================================================
+// Game State Management
+//==============================================================================
 
 void ChessBoard::switch_turn() {
   turn = !turn;
@@ -271,6 +290,10 @@ bool ChessBoard::get_turn() {
 std::shared_ptr<ChessPiece> ChessBoard::get_piece(int x, int y) {
   return state.get_element(0, x+y*8);
 }
+
+//==============================================================================
+// Move Generation and Validation
+//==============================================================================
 
 std::vector<ChessMove> ChessBoard::capturing_moves(bool isWhite) {
   std::vector<ChessMove> capturingMoves;
@@ -314,6 +337,10 @@ std::vector<ChessMove> ChessBoard::possible_moves(bool isWhite) {
   return possible_moves;
 }
 
+//==============================================================================
+// King and Check Management
+//==============================================================================
+
 std::shared_ptr<ChessPiece> ChessBoard::find_king(bool isWhite) {
   for (int x = 0; x < 8; x++) {
     for (int y = 0; y < 8; y++) {
@@ -328,7 +355,7 @@ std::shared_ptr<ChessPiece> ChessBoard::find_king(bool isWhite) {
   return nullptr;
 }
 
-bool ChessBoard::king_in_check(bool isWhite) {
+bool ChessBoard::king_check(bool isWhite) {
   std::shared_ptr<ChessPiece> king = find_king(isWhite);
   if (king != NULL) {
     for (int x = 0; x < 8; x++) {

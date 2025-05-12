@@ -27,7 +27,7 @@ class ChessBoard {
     void ai1_make_move(bool isWhite);
     void ai2_make_move(bool isWhite);
 
-    bool king_in_check(bool isWhite);
+    bool king_check(bool isWhite);
     bool any_valid_move(bool isWhite);
     bool get_turn();
 
