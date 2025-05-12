@@ -1,7 +1,7 @@
 # Makefile for Matrix Class project
 
 CXX = g++
-CXXFLAGS = -std=c++11 -Wall -Wextra -pedantic
+CXXFLAGS = -std=c++17 -Wall -Wextra -pedantic
 
 # Main program
 MAIN_TARGET = matrix_demo
@@ -50,3 +50,14 @@ help:
 	@echo "  test       - Run the test suite"
 	@echo "  clean      - Remove all build files"
 	@echo "  help       - Display this help message"
+
+test_reset: test_reset.cpp Matrix.h
+	$(CXX) $(CXXFLAGS) test_reset.cpp -o test_reset
+
+.PHONY: clean run
+
+run: test_reset
+	./test_reset
+
+clean:
+	rm -f test_reset

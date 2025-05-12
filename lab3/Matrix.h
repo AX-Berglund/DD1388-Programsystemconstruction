@@ -7,6 +7,8 @@
 #include <initializer_list>
 #include <cassert>
 #include <type_traits>
+#include <string>
+#include <sstream>
 
 //
 // DD1388 - Lab 2: The matrix
@@ -90,13 +92,6 @@ public:
         return m_vec + m_capacity;
     }
 
-    const_iterator cbegin() const {
-        return m_vec;
-    }
-    
-    const_iterator cend() const {
-        return m_vec + m_capacity;
-    }
 
 private:
     size_t m_rows;
@@ -107,10 +102,73 @@ private:
 
 // input/output operators
 template<typename T>
-std::istream & operator>>(std::istream & is, Matrix<T> & m);
+std::istream & operator>>(std::istream & is, Matrix<T> & m) {
+    std::vector<T> elements;
+    T value;
+    
+    // Read all elements from the stream
+    while (is >> value) {
+        elements.push_back(value);
+    }
+    
+    // Clear the stream state
+    is.clear();
+    
+    // Calculate dimensions
+    size_t total_elements = elements.size();
+    size_t cols = 0;
+    
+    // Find the number of columns by looking for the first newline
+    std::string line;
+    std::getline(is, line);
+    std::istringstream iss(line);
+    while (iss >> value) {
+        cols++;
+    }
+    
+    // If no columns found, assume it's a square matrix
+    if (cols == 0) {
+        size_t root = sqrt(total_elements);
+        if (root * root != total_elements) {
+            throw std::runtime_error("Number of elements is not a square number");
+        }
+        cols = root;
+    }
+    
+    size_t rows = total_elements / cols;
+    if (rows * cols != total_elements) {
+        throw std::runtime_error("Invalid matrix dimensions");
+    }
+    
+    // Create the matrix with the calculated dimensions
+    Matrix<T> m_temp(rows, cols);
+    m = std::move(m_temp);
+    
+    // Fill the matrix with the read elements
+    for (size_t i = 0; i < rows; ++i) {
+        for (size_t j = 0; j < cols; ++j) {
+            m(i, j) = elements[i * cols + j];
+        }
+    }
+    
+    return is;
+}
 
 template<typename T>
-std::ostream & operator<<(std::ostream & os, const Matrix<T> & m);
+std::ostream & operator<<(std::ostream & os, const Matrix<T> & m) {
+    for (size_t i = 0; i < m.rows(); ++i) {
+        for (size_t j = 0; j < m.cols(); ++j) {
+            os << m(i, j);
+            if (j < m.cols() - 1) {
+                os << " ";
+            }
+        }
+        if (i < m.rows() - 1) {
+            os << std::endl;
+        }
+    }
+    return os;
+}
 
 // functions
 template<typename T>
@@ -119,19 +177,16 @@ Matrix<T> identity(size_t dim);
 // Implementation
 
 template<typename T>
-Matrix<T>::Matrix() {
-    m_vec = nullptr;
-    m_rows = 0;
-    m_cols = 0;
-    m_capacity = 0;
+Matrix<T>::Matrix() : Matrix(0) {  // Delegate to the single-parameter constructor with 0
 }
 
 template<typename T>
 Matrix<T>::Matrix(size_t dim) {
     m_rows = dim;
     m_cols = dim;
-    m_capacity = dim*dim;
-    m_vec = new T[m_capacity];
+    m_capacity = dim * dim;
+    // Always allocate at least one element to maintain consistency
+    m_vec = new T[m_capacity ? m_capacity : 1];
     for(size_t i = 0; i < m_capacity; i++) {
         m_vec[i] = T();
     }
@@ -141,8 +196,9 @@ template<typename T>
 Matrix<T>::Matrix(size_t rows, size_t cols) {
     m_rows = rows;
     m_cols = cols;
-    m_capacity = rows*cols;
-    m_vec = new T[m_capacity];
+    m_capacity = rows * cols;
+    // Always allocate at least one element to maintain consistency
+    m_vec = new T[m_capacity ? m_capacity : 1];
     for(size_t i = 0; i < m_capacity; i++) {
         m_vec[i] = T();
     }
@@ -456,32 +512,13 @@ Matrix<T> operator*(const T& scalar, const Matrix<T>& matrix) {
     return matrix * scalar;  // Use the member operator we defined
 }
 
-// template<typename T>
-// void Matrix<T>::reset() {
-//     if (m_vec == nullptr) {
-//         return;
-//     }
-    
-//     // Try explicitly using the operator() to access each element
-//     for (size_t i = 0; i < m_rows; i++) {
-//         for (size_t j = 0; j < m_cols; j++) {
-//             (*this)(i, j) = T();
-//         }
-//     }
-// }
+
+
 template<typename T>
 void Matrix<T>::reset() {
-    // Guard against empty matrix
-    if (m_capacity == 0 || m_vec == nullptr) {
-        return;
-    }
-    
-    // Use a more direct approach - memset for numeric types like int
-    // Works for all primitive types
-    for (size_t i = 0; i < m_capacity; i++) {
-        m_vec[i] = T();
-    }
-    
+    delete [] m_vec;
+    m_cols = m_rows = m_capacity = 0;
+    m_vec = new T[m_capacity]();
 }
 
 template<typename T>
@@ -635,42 +672,6 @@ void Matrix<T>::remove_column(size_t col) {
     }
     
     *this = std::move(result);
-}
-
-template<typename T>
-std::istream & operator>>(std::istream & is, Matrix<T> & m) {
-    size_t rows, cols;
-    std::cout << "Enter number of rows: " << std::endl;
-    is >> rows;
-    std::cout << "Enter number of cols: " << std::endl;
-    is >> cols;
-    
-    Matrix<T> m_temp(rows, cols);
-    m = std::move(m_temp);
-    
-    std::cout << "Enter each element: " << std::endl;
-    std::cout << "Start with row one and iterate through columns: " << std::endl;
-    for (size_t i = 0; i < rows; ++i) {
-        for (size_t j = 0; j < cols; ++j) {
-            T value;
-            is >> value;
-            m(i, j) = value;
-        }
-    }
-    std::cout << std::endl;
-    
-    return is;
-}
-
-template<typename T>
-std::ostream & operator<<(std::ostream & os, const Matrix<T> & m) {
-    for (size_t i = 0; i < m.rows(); ++i) {
-        for (size_t j = 0; j < m.cols(); ++j) {
-            os << m(i, j) << " ";
-        }
-        os << std::endl;
-    }
-    return os;
 }
 
 template<typename T>
