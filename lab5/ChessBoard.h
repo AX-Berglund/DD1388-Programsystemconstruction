@@ -15,7 +15,7 @@ class ChessBoard {
 
   private:
     Matrix<std::shared_ptr<ChessPiece> > state; 
-    bool turn; // White is 1
+    bool turn; 
 
   public:
     void print_board();

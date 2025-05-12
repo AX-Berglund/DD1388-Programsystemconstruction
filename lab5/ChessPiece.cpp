@@ -3,8 +3,11 @@
 #include "ChessMove.h"
 
 ChessPiece::ChessPiece(int x_, int y_, bool isWhite_, Type type_,
-    ChessBoard* board_) : x(x_), y(y_), isWhite(isWhite_),
-  type(type_), board(board_) {}
+    ChessBoard* board_) : x(x_)
+    , y(y_)
+    , isWhite(isWhite_)
+    , type(type_)
+    , board(board_) {}
 ChessPiece::~ChessPiece() {}
 
 bool ChessPiece::get_color() {
@@ -36,12 +39,10 @@ std::vector<ChessMove> ChessPiece::capturing_moves() {
 
   for (int x=0; x < 8; x++) {
     for (int y=0; y < 8; y++) {
-      if (this->valid_move(x, y)) {
-        if (this->capturing_move(x, y)) {
-          ChessMove move = {this->x, this->y, x, y,
-            this->board->get_piece(this->x, this->y)};
-          moves.push_back(move);
-        }
+      if (this->valid_move(x, y) && this->capturing_move(x, y)) {
+        ChessMove move = {this->x, this->y, x, y,
+          this->board->get_piece(this->x, this->y)};
+        moves.push_back(move);
       }
     }
   }
@@ -54,12 +55,10 @@ std::vector<ChessMove> ChessPiece::non_capturing_moves() {
 
   for (int x=0; x < 8; x++) {
     for (int y=0; y < 8; y++) {
-      if (this->valid_move(x, y)) {
-        if (this->non_capturing_move(x, y)) {
-          ChessMove move = {this->x, this->y, x, y,
-            this->board->get_piece(this->x, this->y)};
-          moves.push_back(move);
-        }
+      if (this->valid_move(x, y) && this->non_capturing_move(x, y)) {
+        ChessMove move = {this->x, this->y, x, y,
+          this->board->get_piece(this->x, this->y)};
+        moves.push_back(move);
       }
     }
   }
