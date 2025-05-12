@@ -18,11 +18,11 @@ char King::latin_representation() {
 }
 
 int King::valid_move(int x_to, int y_to) {
-  int del_x = std::abs(this->x - x_to);
-  int del_y = std::abs(this->y - y_to);
+  int delta_x = std::abs(this->x - x_to);
+  int delta_y = std::abs(this->y - y_to);
 
   // The King can only move within a certain range
-  if (!((del_x + del_y) == 1 || (del_x * del_y) == 1)) {
+  if (!((delta_x + delta_y) == 1 || (delta_x * delta_y) == 1)) {
     return 0;
   }
 

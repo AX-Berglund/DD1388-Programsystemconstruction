@@ -5,7 +5,6 @@
 #include <string>
 
 #include "ChessBoard.h"
-#include "Helper.h"
 
 class ChessBoard;
 struct ChessMove;

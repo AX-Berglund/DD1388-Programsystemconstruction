@@ -29,9 +29,9 @@ int Rook::valid_move(int x_to, int y_to) {
     return 0;
   }
 
-  int del_x = std::abs(this->x - x_to);
-  int del_y = std::abs(this->y - y_to);
-  if (del_x == 0) {
+  int delta_x = std::abs(this->x - x_to);
+  int delta_y = std::abs(this->y - y_to);
+  if (delta_x == 0) {
     if (y_to > this->y) {
       for (int it = this->y+1; it < y_to; it++) {
         if (this->board->get_piece(x_to, it) != NULL) {
@@ -45,7 +45,7 @@ int Rook::valid_move(int x_to, int y_to) {
         }
       }
     }
-  } else if (del_y == 0) {
+  } else if (delta_y == 0) {
     if (x_to > this->x) {
       for (int it = this->x+1; it < x_to; it++) {
         if (this->board->get_piece(it, y_to) != NULL) {
