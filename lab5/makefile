@@ -1,5 +1,5 @@
 CC=clang++
-FLAGS = -std=c++11 -stdlib=libc++ -g -Wall -pedantic
+FLAGS = -std=c++11 -stdlib=libc++ -g -Wall -pedantic -I/opt/homebrew/Cellar/cxxtest/4.4_3/include
 EXETEST=ChessBoard.o ChessPiece.o King.o Knight.o \
 		Pawn.o Bishop.o Rook.o Queen.o  \
 		Helper.o
@@ -7,17 +7,13 @@ EXE=ChessMain.o ChessBoard.o ChessPiece.o King.o Knight.o \
 		Pawn.o Bishop.o Rook.o Queen.o  \
 		Helper.o
 
-# Run all tests
-tests: all all_tests.out
-	./all_tests.out
+# Run tests with input file
+tests: tests.o ${EXETEST}
+	${CC} ${FLAGS} -o tests tests.o ${EXETEST}
+	./tests < tests.in
 
-# Compile the test runner
-all: runner.cpp
-	${CC} ${FLAGS} -o all_tests.out ${EXETEST} runner.cpp
-
-# Generate a test runner
-runner.cpp: cxxtest.cpp
-	cxxtestgen -o $@ --error-printer $^
+tests.o: tests.cpp
+	${CC} ${FLAGS} -c tests.cpp
 
 chess: ${EXE}
 	${CC} ${FLAGS} ${EXE} -o chess

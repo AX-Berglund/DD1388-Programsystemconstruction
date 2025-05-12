@@ -11,7 +11,7 @@ struct ChessMove {
      int x_to;
      int y_to;
 
-    std::shared_ptr<ChessPiece> piece;     // You can change the position of the chess piece with this pointer.
+    std::shared_ptr<ChessPiece> piece;
 };
 
 #endif
