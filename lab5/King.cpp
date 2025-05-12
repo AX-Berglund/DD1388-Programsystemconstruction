@@ -5,19 +5,19 @@
 
 #include <cmath>
 
-KingPiece::KingPiece(int x_, int y_, bool isWhite_, Type type_,
+King::King(int x_, int y_, bool isWhite_, Type type_,
     ChessBoard* board_) : ChessPiece(x_, y_, isWhite_, type_, board_) {}
-KingPiece::~KingPiece() {}
+King::~King() {}
 
-char const* KingPiece::utf_representation() {
+char const* King::utf_representation() {
   return this->isWhite ? "♔" : "♚";
 }
 
-char KingPiece::latin_representation() {
+char King::latin_representation() {
   return this->isWhite ? 'K' : 'k';
 }
 
-int KingPiece::valid_move(int x_to, int y_to) {
+int King::valid_move(int x_to, int y_to) {
   int del_x = std::abs(this->x - x_to);
   int del_y = std::abs(this->y - y_to);
 

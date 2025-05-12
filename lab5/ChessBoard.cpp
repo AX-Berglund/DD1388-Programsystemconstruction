@@ -15,65 +15,47 @@
 #include <cmath>
 
 void ChessBoard::move_piece(ChessMove move) {
-  // Retrieve the piece to move
   std::shared_ptr<ChessPiece> cp = move.piece;
 
-  // Change the x- and y-coordinates of the piece
   cp->x = move.x_to;
   cp->y = move.y_to;
 
-  // Move the piece
   this->state.set_element(0, move.x_to+move.y_to*8, cp);
 
-  // Make the original square empty (i.e. set pointer to NULL)
   this->state.set_element(0, move.x_from+move.y_from*8, NULL);
 }
 
 void ChessBoard::rewind_move_piece(ChessMove move,
  std::shared_ptr<ChessPiece> cp_removed_by_move) {
-  // Retrieve the piece of the move to rewind
   std::shared_ptr<ChessPiece> cp_to_rewind = move.piece;
 
-  // Change the x- and y-coordinates of the piece
   cp_to_rewind->x = move.x_from;
   cp_to_rewind->y = move.y_from;
 
-  // Put the moved piece back into its original place
   this->state.set_element(0, move.x_from+move.y_from*8, cp_to_rewind);
 
-  // Put the piece removed by the move back into place
   this->state.set_element(0, move.x_to+move.y_to*8, cp_removed_by_move);
 }
 
 void ChessBoard::ai1_make_move(bool isWhite) {
-  /* AI-1 strategy: random thinker
-     - Random non-capturing move if no captures.
-     - Random capturing move if captures exist.
-     - Random piece selection for pawn promotion. */
-  // Get all non-capturing and capturing moves
+
   std::vector<ChessMove> nc_moves = non_capturing_moves(isWhite);
   std::vector<ChessMove> c_moves = capturing_moves(isWhite);
 
   ChessMove move;
-  // If capturing moves, randomly select a move
   if (c_moves.size() > 0) {
     move = *select_random_element(c_moves.begin(), c_moves.end());
-  // Otherwise randomly select a non-capturing move
   } else {
     move = *select_random_element(nc_moves.begin(), nc_moves.end());
   }
 
-  // Make the move
   move_piece(move);
 
-  // Promote pawn to random piece if it reaches the end.
   if ((move.piece->type == pawn && move.piece->isWhite && move.y_to == 7) ||
       (move.piece->type == pawn && !move.piece->isWhite && move.y_to == 0)) {
-      // Select a random promotion piece
       int num = gen_rand_num(0, 4);
       std::shared_ptr<ChessPiece> cp_new = create_new_piece(move.x_to,
           move.y_to, move.piece->get_color(), Type(num), move.piece->board);
-      // Place the promotion piece on the board
       this->state.set_element(0, move.y_to*8+move.x_to, cp_new);
   }
 
@@ -81,19 +63,14 @@ void ChessBoard::ai1_make_move(bool isWhite) {
 }
 
 void ChessBoard::ai2_make_move(bool isWhite) {
-  /* AI-2 strategy: think one step ahead
-     - Avoid moves that allow opponent captures.
-     - Prefer non-capturing moves that force opponent captures.
-     - Prefer promotions that avoid immediate capture. */
-  // Get all non-capturing and capturing moves
+
   std::vector<ChessMove> nc_moves = non_capturing_moves(isWhite);
   std::vector<ChessMove> c_moves = capturing_moves(isWhite);
 
   bool hasMoved = false;
   ChessMove move;
   if (c_moves.size() > 0) {
-    // If capturing move, see if one could force the opponent to capture one of
-    // ours
+
     for (auto const& m: c_moves) {
       std::shared_ptr<ChessPiece> cp_to = this->get_piece(m.x_to, m.y_to);
       move_piece(m);
@@ -105,13 +82,11 @@ void ChessBoard::ai2_make_move(bool isWhite) {
         rewind_move_piece(m, cp_to);
       }
     }
-    // Default to random selection
     if (!hasMoved) {
       move = *select_random_element(c_moves.begin(), c_moves.end());
       move_piece(move);
     }
-  // Otherwise see if a non-capturing move could force the opponent to capture
-  // one of ours
+
   } else {
     for (auto const& m: nc_moves) {
       std::shared_ptr<ChessPiece> cp_to = this->get_piece(m.x_to, m.y_to);
@@ -124,23 +99,18 @@ void ChessBoard::ai2_make_move(bool isWhite) {
         rewind_move_piece(m, cp_to);
       }
     }
-    // Default to random selection
     if (!hasMoved) {
       move = *select_random_element(nc_moves.begin(), nc_moves.end());
       move_piece(move);
     }
   }
 
-  // Promote pawn to avoid capture if possible, else random.
   if ((move.piece->type == pawn && move.piece->isWhite && move.y_to == 7) ||
       (move.piece->type == pawn && !move.piece->isWhite && move.y_to == 0)) {
     bool hasBeenPromoted = false;
-    // See if particular promotion could force the opponent to capture one of
-    // ours
     for (int i = 0; i < 5; i++) {
       std::shared_ptr<ChessPiece> cp_new = create_new_piece(move.x_to,
           move.y_to, move.piece->get_color(), Type(i), move.piece->board);
-      // Place the promotion piece on the board
       if (capturing_moves(!isWhite).size() != 0) {
         this->state.set_element(0, move.y_to*8+move.x_to, cp_new);
         hasBeenPromoted = true;
@@ -148,12 +118,10 @@ void ChessBoard::ai2_make_move(bool isWhite) {
       }
     }
 
-    // Default to random selection
     if (!hasBeenPromoted) {
       int num = gen_rand_num(0, 4);
       std::shared_ptr<ChessPiece> cp_new = create_new_piece(move.x_to,
           move.y_to, move.piece->get_color(), Type(num), move.piece->board);
-      // Place the promotion piece on the board
       this->state.set_element(0, move.y_to*8+move.x_to, cp_new);
     }
   }
@@ -166,18 +134,18 @@ std::shared_ptr<ChessPiece> ChessBoard::create_new_piece(int x, int y,
   std::shared_ptr<ChessPiece> cp;
   switch (type) {
     case king:
-        cp = std::make_shared<KingPiece>(x, y, isWhite, king, board);
+        cp = std::make_shared<King>(x, y, isWhite, king, board);
     case queen:
-        cp = std::make_shared<QueenPiece>(x, y, isWhite, queen, board);
+        cp = std::make_shared<Queen>(x, y, isWhite, queen, board);
       break;
     case bishop:
-        cp = std::make_shared<BishopPiece>(x, y, isWhite, bishop, board);
+        cp = std::make_shared<Bishop>(x, y, isWhite, bishop, board);
       break;
     case knight:
-        cp = std::make_shared<KnightPiece>(x, y, isWhite, knight, board);
+        cp = std::make_shared<Knight>(x, y, isWhite, knight, board);
       break;
     case rook:
-        cp = std::make_shared<RookPiece>(x, y, isWhite, rook, board);
+        cp = std::make_shared<Rook>(x, y, isWhite, rook, board);
       break;
   }
   return cp;
@@ -194,7 +162,6 @@ ChessBoard & operator>>(std::istream& is, ChessBoard& board) {
 
   char c;
   int cnt = 0;
-  // Read the input stream
   c = is.get();
   while (is) {
     if (c == '\n') {
@@ -202,54 +169,53 @@ ChessBoard & operator>>(std::istream& is, ChessBoard& board) {
     } else {
       int x = cnt % 8;
       int y = std::floor(cnt / 8);
-      // Put piece corresponding to character on the board
       switch (c) {
         case 'K':
-          m.set_element(0, cnt, std::make_shared<KingPiece>(
+          m.set_element(0, cnt, std::make_shared<King>(
                 x, y, true, king, &board));
           break;
         case 'k':
-          m.set_element(0, cnt, std::make_shared<KingPiece>(
+          m.set_element(0, cnt, std::make_shared<King>(
                 x, y, false, king, &board));
           break;
         case 'Q':
-          m.set_element(0, cnt, std::make_shared<QueenPiece>(
+          m.set_element(0, cnt, std::make_shared<Queen>(
                 x, y, true, queen, &board));
           break;
         case 'q':
-          m.set_element(0, cnt, std::make_shared<QueenPiece>(
+          m.set_element(0, cnt, std::make_shared<Queen>(
                 x, y, false, queen, &board));
           break;
         case 'N':
-          m.set_element(0, cnt, std::make_shared<KnightPiece>(
+          m.set_element(0, cnt, std::make_shared<Knight>(
                 x, y, true, knight, &board));
           break;
         case 'n':
-          m.set_element(0, cnt, std::make_shared<KnightPiece>(
+          m.set_element(0, cnt, std::make_shared<Knight>(
                 x, y, false, knight, &board));
           break;
         case 'P':
-          m.set_element(0, cnt, std::make_shared<PawnPiece>(
+          m.set_element(0, cnt, std::make_shared<Pawn>(
                 x, y, true, pawn, &board));
           break;
         case 'p':
-          m.set_element(0, cnt, std::make_shared<PawnPiece>(
+          m.set_element(0, cnt, std::make_shared<Pawn>(
                 x, y, false, pawn, &board));
           break;
         case 'B':
-          m.set_element(0, cnt, std::make_shared<BishopPiece>(
+          m.set_element(0, cnt, std::make_shared<Bishop>(
                 x, y, true, bishop, &board));
           break;
         case 'b':
-          m.set_element(0, cnt, std::make_shared<BishopPiece>(
+          m.set_element(0, cnt, std::make_shared<Bishop>(
                 x, y, false, bishop, &board));
           break;
         case 'R':
-          m.set_element(0, cnt, std::make_shared<RookPiece>(
+          m.set_element(0, cnt, std::make_shared<Rook>(
                 x, y, true, rook, &board));
           break;
         case 'r':
-          m.set_element(0, cnt, std::make_shared<RookPiece>(
+          m.set_element(0, cnt, std::make_shared<Rook>(
                 x, y, false, rook, &board));
           break;
         default:
@@ -264,7 +230,6 @@ ChessBoard & operator>>(std::istream& is, ChessBoard& board) {
     exit(0);
   }
 
-  // Initialize the board
   board.initialise_board(m);
 
   return board;
